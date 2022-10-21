@@ -1,0 +1,17 @@
+{
+	"name": "AzureSqlTable3",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ToSqlDb",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "stuSchema",
+			"table": "D1Students"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

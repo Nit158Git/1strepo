@@ -1,0 +1,84 @@
+{
+	"name": "dflowCldStuds",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "DelimitedText4",
+						"type": "DatasetReference"
+					},
+					"name": "extractClgStud"
+				},
+				{
+					"dataset": {
+						"referenceName": "clgDeptDS",
+						"type": "DatasetReference"
+					},
+					"name": "extractClgDept"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "SQLdbDS",
+						"type": "DatasetReference"
+					},
+					"name": "loadStd2"
+				}
+			],
+			"transformations": [
+				{
+					"name": "transAdmNo"
+				},
+				{
+					"name": "joinDeptStud"
+				},
+				{
+					"name": "remUnwatedCols"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          {Roll No} as string,",
+				"          {Student Name} as string,",
+				"          {Dept Id} as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> extractClgStud",
+				"source(output(",
+				"          {Dept ID} as string,",
+				"          {Dept Name} as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> extractClgDept",
+				"extractClgStud derive({Adm No} = concat('2022', '-' ,{Dept Id},'-',{Roll No})) ~> transAdmNo",
+				"transAdmNo, extractClgDept join(extractClgStud@{Dept Id} == extractClgDept@{Dept ID},",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinDeptStud",
+				"joinDeptStud select(mapColumn(",
+				"          {Adm No},",
+				"          {Stud Name} = {Student Name},",
+				"          {Dept Name}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> remUnwatedCols",
+				"remUnwatedCols sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> loadStd2"
+			]
+		}
+	}
+}

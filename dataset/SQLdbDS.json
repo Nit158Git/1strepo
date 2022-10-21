@@ -1,0 +1,17 @@
+{
+	"name": "SQLdbDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ToSqlDb",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "ClgStd",
+			"table": "ClgStudWithDept"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

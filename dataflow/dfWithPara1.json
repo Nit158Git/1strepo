@@ -1,0 +1,74 @@
+{
+	"name": "dfWithPara1",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "StudDs",
+						"type": "DatasetReference"
+					},
+					"name": "extFromStudent"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AzureSqlTable3",
+						"type": "DatasetReference"
+					},
+					"name": "Load2Db"
+				}
+			],
+			"transformations": [
+				{
+					"name": "select1"
+				},
+				{
+					"name": "filter1"
+				}
+			],
+			"scriptLines": [
+				"parameters{",
+				"     dfpara1 as string (DeptID)",
+				"}",
+				"source(output(",
+				"          Student as string,",
+				"          Name as string,",
+				"          Contact as string,",
+				"          DeptID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> extFromStudent",
+				"extFromStudent select(mapColumn(",
+				"          {Roll No} = Student,",
+				"          Name,",
+				"          Contact,",
+				"          DeptID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 filter(DeptID==$dfpara1) ~> filter1",
+				"filter1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     mapColumn(",
+				"          Name,",
+				"          Contact,",
+				"          DeptID",
+				"     ),",
+				"     preCommands: [],",
+				"     postCommands: []) ~> Load2Db"
+			]
+		}
+	}
+}

@@ -1,0 +1,28 @@
+{
+	"name": "powerquery1st",
+	"properties": {
+		"type": "WranglingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "Ds4Emp",
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> Ds4Emp",
+					"dataset": {
+						"referenceName": "Ds4Emp",
+						"type": "DatasetReference"
+					}
+				},
+				{
+					"name": "DseEpCity",
+					"script": "source(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> DseEpCity",
+					"dataset": {
+						"referenceName": "DseEpCity",
+						"type": "DatasetReference"
+					}
+				}
+			],
+			"script": "section Section1;\r\nshared Ds4Emp = let AdfDoc = AzureStorage.DataLakeContents(\"https://nit158dl.dfs.core.windows.net/adfdir1/rawdata/emp.csv\"),Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]), PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true]),\r\n  #\"Changed column type\" = Table.TransformColumnTypes(PromotedHeaders, {{\"dob\", type date}}) in  #\"Changed column type\";\r\nshared DseEpCity = let AdfDoc = AzureStorage.DataLakeContents(\"https://nit158dl.dfs.core.windows.net/adfdir1/rawdata/empCityTbl.csv\"),Csv = Csv.Document(AdfDoc, [Delimiter = \",\", Encoding = TextEncoding.Utf8, QuoteStyle = QuoteStyle.Csv]), PromotedHeaders = Table.PromoteHeaders(Csv, [PromoteAllScalars = true]) in  PromotedHeaders;\r\nshared UserQuery = let Source = #\"Ds4Emp\",\r\n  #\"Renamed columns\" = Table.RenameColumns(Source, {{\"ename\", \"emp name\"}}),\r\n  #\"Changed column type\" = Table.TransformColumnTypes(#\"Renamed columns\", {{\"salary\", Int64.Type}}),\r\n  #\"Capitalized each word\" = Table.TransformColumns(#\"Changed column type\", {{\"emp name\", each Text.Proper(_), type nullable text}}),\r\n  #\"Trimmed text\" = Table.TransformColumns(#\"Capitalized each word\", {{\"emp name\", each Text.Trim(_), type nullable text}}),\r\n  #\"Uppercased text\" = Table.TransformColumns(#\"Trimmed text\", {{\"desig\", each Text.Upper(_), type nullable text}}),\r\n  #\"Inserted merged column\" = Table.AddColumn(#\"Uppercased text\", \"emp-design\", each Text.Combine({[emp name], [desig]}, \"-\"), type text),\r\n  #\"Replaced value\" = Table.ReplaceValue(#\"Inserted merged column\", \"f\", \"Female\", Replacer.ReplaceText, {\"gender\"}),\r\n  #\"Replaced value 1\" = Table.ReplaceValue(#\"Replaced value\", \"m\", \"Male\", Replacer.ReplaceValue, {\"gender\"}),\r\n  #\"Capitalized each word 1\" = Table.TransformColumns(#\"Replaced value 1\", {{\"dname\", each Text.Proper(_), type nullable text}, {\"desig\", each Text.Proper(_), type nullable text}}),\r\n  #\"Removed duplicates\" = Table.Distinct(#\"Capitalized each word 1\", {\"empid\"}),\r\n  #\"Merged queries\" = Table.NestedJoin(#\"Removed duplicates\", {\"empid\"}, DseEpCity, {\"empid\"}, \"DseEpCity\", JoinKind.LeftOuter),\r\n  #\"Expanded DseEpCity\" = Table.ExpandTableColumn(#\"Merged queries\", \"DseEpCity\", {\"empcity\"}, {\"empcity\"}),\r\n  #\"Changed column type 1\" = Table.TransformColumnTypes(#\"Expanded DseEpCity\", {{\"empid\", Int64.Type}}),\r\n  #\"Inserted conditional column\" = Table.AddColumn(#\"Changed column type 1\", \"Tax\", each if [salary] > 7000 then [salary]*0.3 else 0) in #\"Inserted conditional column\";\r\n",
+			"documentLocale": "en-us"
+		}
+	}
+}

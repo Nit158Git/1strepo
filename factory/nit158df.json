@@ -1,0 +1,9 @@
+{
+	"name": "nit158df",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "5cfba91e-36af-44a4-8965-a4d5232aef0d",
+		"tenantId": "5032c4a6-d540-4868-9a75-06ec3038374c"
+	}
+}

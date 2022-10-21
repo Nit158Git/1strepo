@@ -1,0 +1,17 @@
+{
+	"name": "StuDb",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ToSqlDb",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "stuSchema",
+			"table": "Students"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

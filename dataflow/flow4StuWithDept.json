@@ -1,0 +1,97 @@
+{
+	"name": "flow4StuWithDept",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "StudDs",
+						"type": "DatasetReference"
+					},
+					"name": "extractStu"
+				},
+				{
+					"dataset": {
+						"referenceName": "StuDeptDS",
+						"type": "DatasetReference"
+					},
+					"name": "extStuDept"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "StuDb",
+						"type": "DatasetReference"
+					},
+					"name": "load2SQLDb"
+				}
+			],
+			"transformations": [
+				{
+					"name": "transStud"
+				},
+				{
+					"name": "transRollNo"
+				},
+				{
+					"name": "joinStuDept"
+				},
+				{
+					"name": "removeCols"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          Student as string,",
+				"          Name as string,",
+				"          Contact as integer,",
+				"          DeptID as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> extractStu",
+				"source(output(",
+				"          {Dept ID} as string,",
+				"          {Dept Name} as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> extStuDept",
+				"extractStu select(mapColumn(",
+				"          {Roll No} = Student,",
+				"          Name,",
+				"          {Contact No.} = Contact,",
+				"          {Dept ID} = DeptID",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> transStud",
+				"transStud derive({Roll No} = concat( '2022','-',{Dept ID},'-',{Roll No})) ~> transRollNo",
+				"transRollNo, extStuDept join(transStud@{Dept ID} == extStuDept@{Dept ID},",
+				"     joinType:'left',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> joinStuDept",
+				"joinStuDept select(mapColumn(",
+				"          {Roll No},",
+				"          Name,",
+				"          {Dept Name},",
+				"          {Contact No.}",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> removeCols",
+				"removeCols sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> load2SQLDb"
+			]
+		}
+	}
+}

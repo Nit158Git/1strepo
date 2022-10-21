@@ -1,0 +1,20 @@
+{
+	"name": "MetadataDrivenCopyTask_5y5_ControlDS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ToSqlDb",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "MetadataDrivenCopyTask_5y5_20221010"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "MainControlTable_5y5"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
