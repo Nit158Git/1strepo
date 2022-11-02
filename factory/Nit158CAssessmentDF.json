@@ -1,0 +1,9 @@
+{
+	"name": "Nit158CAssessmentDF",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "ded439a9-da55-45b5-8767-8eb230e0cb20",
+		"tenantId": "5032c4a6-d540-4868-9a75-06ec3038374c"
+	}
+}
